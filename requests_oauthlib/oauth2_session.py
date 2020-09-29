@@ -1,12 +1,12 @@
 from __future__ import unicode_literals
 
 import logging
+import aiohttp
 
 from oauthlib.common import generate_token, urldecode
 from oauthlib.oauth2 import WebApplicationClient, InsecureTransportError
 from oauthlib.oauth2 import LegacyApplicationClient
 from oauthlib.oauth2 import TokenExpiredError, is_secure_transport
-import requests
 
 log = logging.getLogger(__name__)
 
@@ -17,7 +17,7 @@ class TokenUpdated(Warning):
         self.token = token
 
 
-class OAuth2Session(requests.Session):
+class OAuth2Session(aiohttp.ClientSession):
     """Versatile OAuth 2 extension to :class:`requests.Session`.
 
     Supports any grant type adhering to :class:`oauthlib.oauth2.Client` spec
@@ -172,7 +172,7 @@ class OAuth2Session(requests.Session):
             state,
         )
 
-    def fetch_token(
+    async def fetch_token(
         self,
         token_url,
         code=None,
@@ -307,7 +307,7 @@ class OAuth2Session(requests.Session):
                         client_id,
                     )
                     client_secret = client_secret if client_secret is not None else ""
-                    auth = requests.auth.HTTPBasicAuth(client_id, client_secret)
+                    auth = aiohttp.BasicAuth(client_id, client_secret)
 
         if include_client_id:
             # this was pulled out of the params
@@ -338,7 +338,7 @@ class OAuth2Session(requests.Session):
         else:
             raise ValueError("The method kwarg must be POST or GET.")
 
-        r = self.request(
+        async with self.request(
             method=method,
             url=token_url,
             timeout=timeout,
@@ -348,25 +348,25 @@ class OAuth2Session(requests.Session):
             proxies=proxies,
             cert=cert,
             **request_kwargs
-        )
+        ) as r:
+            text = await r.text()
+            log.debug("Request to fetch token completed with status %s.", r.status)
+            log.debug("Request url was %s", r.request.url)
+            log.debug("Request headers were %s", r.request.headers)
+            log.debug("Request body was %s", r.request.body)
+            log.debug("Response headers were %s and content %s.", r.headers, text)
+            log.debug(
+                "Invoking %d token response hooks.",
+                len(self.compliance_hook["access_token_response"]),
+            )
+            for hook in self.compliance_hook["access_token_response"]:
+                log.debug("Invoking hook %s.", hook)
+                r = hook(r, text)
 
-        log.debug("Request to fetch token completed with status %s.", r.status_code)
-        log.debug("Request url was %s", r.request.url)
-        log.debug("Request headers were %s", r.request.headers)
-        log.debug("Request body was %s", r.request.body)
-        log.debug("Response headers were %s and content %s.", r.headers, r.text)
-        log.debug(
-            "Invoking %d token response hooks.",
-            len(self.compliance_hook["access_token_response"]),
-        )
-        for hook in self.compliance_hook["access_token_response"]:
-            log.debug("Invoking hook %s.", hook)
-            r = hook(r)
-
-        self._client.parse_request_body_response(r.text, scope=self.scope)
-        self.token = self._client.token
-        log.debug("Obtained token %s.", self.token)
-        return self.token
+            self._client.parse_request_body_response(text, scope=self.scope)
+            self.token = self._client.token
+            log.debug("Obtained token %s.", self.token)
+            return self.token
 
     def token_from_fragment(self, authorization_response):
         """Parse token from the URI fragment, used by MobileApplicationClients.
@@ -380,7 +380,7 @@ class OAuth2Session(requests.Session):
         self.token = self._client.token
         return self.token
 
-    def refresh_token(
+    async def refresh_token(
         self,
         token_url,
         refresh_token=None,
@@ -429,7 +429,7 @@ class OAuth2Session(requests.Session):
                 "Content-Type": ("application/x-www-form-urlencoded;charset=UTF-8"),
             }
 
-        r = self.post(
+        async with self.post(
             token_url,
             data=dict(urldecode(body)),
             auth=auth,
@@ -438,24 +438,25 @@ class OAuth2Session(requests.Session):
             verify=verify,
             withhold_token=True,
             proxies=proxies,
-        )
-        log.debug("Request to refresh token completed with status %s.", r.status_code)
-        log.debug("Response headers were %s and content %s.", r.headers, r.text)
-        log.debug(
-            "Invoking %d token response hooks.",
-            len(self.compliance_hook["refresh_token_response"]),
-        )
-        for hook in self.compliance_hook["refresh_token_response"]:
-            log.debug("Invoking hook %s.", hook)
-            r = hook(r)
+        ) as r:
+            text = await r.text()
+            log.debug("Request to refresh token completed with status %s.", r.status)
+            log.debug("Response headers were %s and content %s.", r.headers, text)
+            log.debug(
+                "Invoking %d token response hooks.",
+                len(self.compliance_hook["refresh_token_response"]),
+            )
+            for hook in self.compliance_hook["refresh_token_response"]:
+                log.debug("Invoking hook %s.", hook)
+                r = hook(r, text)
 
-        self.token = self._client.parse_request_body_response(r.text, scope=self.scope)
-        if not "refresh_token" in self.token:
-            log.debug("No new refresh token given. Re-using old.")
-            self.token["refresh_token"] = refresh_token
-        return self.token
+            self.token = self._client.parse_request_body_response(text, scope=self.scope)
+            if not "refresh_token" in self.token:
+                log.debug("No new refresh token given. Re-using old.")
+                self.token["refresh_token"] = refresh_token
+            return self.token
 
-    def request(
+    async def request(
         self,
         method,
         url,
@@ -498,7 +499,7 @@ class OAuth2Session(requests.Session):
                             'Encoding client_id "%s" with client_secret as Basic auth credentials.',
                             client_id,
                         )
-                        auth = requests.auth.HTTPBasicAuth(client_id, client_secret)
+                        auth = aiohttp.BasicAuth(client_id, client_secret)
                     token = self.refresh_token(
                         self.auto_refresh_url, auth=auth, **kwargs
                     )

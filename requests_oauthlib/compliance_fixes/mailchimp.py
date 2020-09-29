@@ -4,8 +4,8 @@ from oauthlib.common import to_unicode
 
 
 def mailchimp_compliance_fix(session):
-    def _null_scope(r):
-        token = json.loads(r.text)
+    async def _null_scope(r, text):
+        token = json.loads(text)
         if "scope" in token and token["scope"] is None:
             token.pop("scope")
         r._content = to_unicode(json.dumps(token)).encode("utf-8")

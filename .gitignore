@@ -12,6 +12,7 @@ requests_oauthlib.egg-info/
 *.swp
 *~
 env/
+venv/
 build/
 dist/
 .tox/

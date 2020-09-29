@@ -12,8 +12,8 @@ from oauthlib.common import to_unicode
 
 
 def fitbit_compliance_fix(session):
-    def _missing_error(r):
-        token = loads(r.text)
+    def _missing_error(r, text):
+        token = loads(text)
         if "errors" in token:
             # Set the error to the first one we have
             token["error"] = token["errors"][0]["errorType"]

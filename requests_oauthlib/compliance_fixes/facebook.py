@@ -9,7 +9,7 @@ from oauthlib.common import to_unicode
 
 
 def facebook_compliance_fix(session):
-    def _compliance_fix(r):
+    def _compliance_fix(r, text):
         # if Facebook claims to be sending us json, let's trust them.
         if "application/json" in r.headers.get("content-type", {}):
             return r
@@ -17,8 +17,8 @@ def facebook_compliance_fix(session):
         # Facebook returns a content-type of text/plain when sending their
         # x-www-form-urlencoded responses, along with a 200. If not, let's
         # assume we're getting JSON and bail on the fix.
-        if "text/plain" in r.headers.get("content-type", {}) and r.status_code == 200:
-            token = dict(parse_qsl(r.text, keep_blank_values=True))
+        if "text/plain" in r.headers.get("content-type", {}) and r.status == 200:
+            token = dict(parse_qsl(text, keep_blank_values=True))
         else:
             return r
 
