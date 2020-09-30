@@ -1,10 +1,11 @@
 from __future__ import unicode_literals
 from oauthlib.oauth2 import WebApplicationClient, InsecureTransportError
 from oauthlib.oauth2 import is_secure_transport
-from requests.auth import AuthBase
+
+import aiohttp
 
 
-class OAuth2(AuthBase):
+class OAuth2(aiohttp.BasicAuth):
     """Adds proof of authorization (OAuth2 token) to the request."""
 
     def __init__(self, client_id=None, client=None, token=None):
@@ -32,6 +33,6 @@ class OAuth2(AuthBase):
         if not is_secure_transport(r.url):
             raise InsecureTransportError()
         r.url, r.headers, r.body = self._client.add_token(
-            r.url, http_method=r.method, body=r.body, headers=r.headers
+            r.url, http_method=r.method, body=await r.read(), headers=r.headers
         )
         return r
