@@ -349,9 +349,9 @@ class OAuth2Session(aiohttp.ClientSession):
         ) as r:
             text = await r.text()
             log.debug("Request to fetch token completed with status %s.", r.status)
-            log.debug("Request url was %s", r.request.url)
-            log.debug("Request headers were %s", r.request.headers)
-            log.debug("Request body was %s", r.request.body)
+            log.debug("Request url was %s", r.request_info.url)
+            log.debug("Request headers were %s", r.request_info.headers)
+            log.debug("Request body was %s", r.request_info.body)
             log.debug("Response headers were %s and content %s.", r.headers, text)
             log.debug(
                 "Invoking %d token response hooks.",
