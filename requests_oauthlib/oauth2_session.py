@@ -3,6 +3,7 @@ from __future__ import unicode_literals
 import logging
 import aiohttp
 
+from requests_oauthlib.utils import BasicAuth
 from oauthlib.common import generate_token, urldecode
 from oauthlib.oauth2 import WebApplicationClient, InsecureTransportError
 from oauthlib.oauth2 import LegacyApplicationClient
@@ -304,7 +305,7 @@ class OAuth2Session(aiohttp.ClientSession):
                         client_id,
                     )
                     client_secret = client_secret if client_secret is not None else ""
-                    auth = aiohttp.BasicAuth(client_id, client_secret)
+                    auth = BasicAuth(client_id, client_secret)
 
         if include_client_id:
             # this was pulled out of the params
@@ -496,7 +497,7 @@ class OAuth2Session(aiohttp.ClientSession):
                             'Encoding client_id "%s" with client_secret as Basic auth credentials.',
                             client_id,
                         )
-                        auth = aiohttp.BasicAuth(client_id, client_secret)
+                        auth = BasicAuth(client_id, client_secret)
                     token = self.refresh_token(
                         self.auto_refresh_url, auth=auth, **kwargs
                     )
