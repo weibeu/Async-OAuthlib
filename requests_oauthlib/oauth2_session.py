@@ -187,10 +187,10 @@ class OAuth2Session(aiohttp.ClientSession):
         timeout=None,
         headers=None,
         verify_ssl=True,
-        proxies=None,
+        proxy=None,
         include_client_id=None,
         client_secret=None,
-        cert=None,
+        ssl_context=None,
         **kwargs
     ):
         """Generic method for fetching an access token from the token endpoint.
@@ -220,7 +220,7 @@ class OAuth2Session(aiohttp.ClientSession):
         :param timeout: Timeout of the request in seconds.
         :param headers: Dict to default request headers with.
         :param verify_ssl: Verify SSL certificate.
-        :param proxies: The `proxies` argument is passed onto `requests`.
+        :param proxy: The `proxy` argument is passed onto `aiohttp`.
         :param include_client_id: Should the request body include the
                                   `client_id` parameter. Default is `None`,
                                   which will attempt to autodetect. This can be
@@ -231,10 +231,7 @@ class OAuth2Session(aiohttp.ClientSession):
                               `auth` tuple. If the value is `None`, it will be
                               omitted from the request, however if the value is
                               an empty string, an empty string will be sent.
-        :param cert: Client certificate to send for OAuth 2.0 Mutual-TLS Client 
-                     Authentication (draft-ietf-oauth-mtls). Can either be the 
-                     path of a file containing the private key and certificate or 
-                     a tuple of two filenames for certificate and key.
+        :param ssl_context: The ssl context being passed to `aiohttp` ssl_context.
         :param kwargs: Extra parameters to include in the token request.
         :return: A token dict
         """
@@ -346,8 +343,8 @@ class OAuth2Session(aiohttp.ClientSession):
             headers=headers,
             auth=auth,
             verify_ssl=verify_ssl,
-            proxies=proxies,
-            cert=cert,
+            proxy=proxy,
+            ssl_context=ssl_context,
             **request_kwargs
         ) as r:
             text = await r.text()
@@ -390,7 +387,7 @@ class OAuth2Session(aiohttp.ClientSession):
         timeout=None,
         headers=None,
         verify_ssl=True,
-        proxies=None,
+        proxy=None,
         **kwargs
     ):
         """Fetch a new access token using a refresh token.
@@ -403,7 +400,7 @@ class OAuth2Session(aiohttp.ClientSession):
         :param timeout: Timeout of the request in seconds.
         :param headers: A dict of headers to be used by `requests`.
         :param verify_ssl: Verify SSL certificate.
-        :param proxies: The `proxies` argument will be passed to `requests`.
+        :param proxy: The `proxy` argument will be passed to `requests`.
         :param kwargs: Extra parameters to include in the token request.
         :return: A token dict
         """
@@ -438,7 +435,7 @@ class OAuth2Session(aiohttp.ClientSession):
             headers=headers,
             verify=verify_ssl,
             withhold_token=True,
-            proxies=proxies,
+            proxy=proxy,
         ) as r:
             text = await r.text()
             log.debug("Request to refresh token completed with status %s.", r.status)
