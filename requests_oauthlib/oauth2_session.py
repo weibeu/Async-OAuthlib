@@ -507,7 +507,7 @@ class OAuth2Session(aiohttp.ClientSession):
                         log.debug(
                             "Updating token to %s using %s.", token, self.token_updater
                         )
-                        self.token_updater(token)
+                        await self.token_updater(token)
                         url, headers, data = self._client.add_token(
                             url, http_method=method, body=data, headers=headers
                         )
