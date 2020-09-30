@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 import requests
-import requests_oauthlib
+import async_oauthlib
 import oauthlib
 import os.path
 from io import StringIO
@@ -20,7 +20,7 @@ class OAuth1Test(unittest.TestCase):
         """OAuth1 assumes form encoded if content type is not specified."""
         generate_nonce.return_value = "abc"
         generate_timestamp.return_value = "1"
-        oauth = requests_oauthlib.OAuth1("client_key")
+        oauth = async_oauthlib.OAuth1("client_key")
         headers = {"Content-type": "application/x-www-form-urlencoded"}
         r = requests.Request(
             method="POST",
@@ -57,7 +57,7 @@ class OAuth1Test(unittest.TestCase):
         """OAuth signature only depend on body if it is form encoded."""
         generate_nonce.return_value = "abc"
         generate_timestamp.return_value = "1"
-        oauth = requests_oauthlib.OAuth1("client_key")
+        oauth = async_oauthlib.OAuth1("client_key")
 
         r = requests.Request(
             method="POST",
@@ -91,7 +91,7 @@ class OAuth1Test(unittest.TestCase):
         """
         generate_nonce.return_value = "abc"
         generate_timestamp.return_value = "1"
-        oauth = requests_oauthlib.OAuth1("client_key")
+        oauth = async_oauthlib.OAuth1("client_key")
         dirname = os.path.dirname(__file__)
         fname = os.path.join(dirname, "test.bin")
 
@@ -111,7 +111,7 @@ class OAuth1Test(unittest.TestCase):
         """
         generate_nonce.return_value = "abc"
         generate_timestamp.return_value = "1"
-        oauth = requests_oauthlib.OAuth1("client_key")
+        oauth = async_oauthlib.OAuth1("client_key")
 
         r = requests.get("http://httpbin.org/get", auth=oauth)
         self.assertIsInstance(r.request.url, str)
@@ -122,7 +122,7 @@ class OAuth1Test(unittest.TestCase):
         """
         generate_nonce.return_value = "abc"
         generate_timestamp.return_value = "1"
-        oauth = requests_oauthlib.OAuth1("client_key")
+        oauth = async_oauthlib.OAuth1("client_key")
         data = "a"
         r = requests.post("http://httpbin.org/get", data=data, auth=oauth)
         self.assertEqual(
@@ -140,25 +140,25 @@ class OAuth1Test(unittest.TestCase):
         class ClientSubclass(oauthlib.oauth1.Client):
             pass
 
-        self.assertTrue(hasattr(requests_oauthlib.OAuth1, "client_class"))
+        self.assertTrue(hasattr(async_oauthlib.OAuth1, "client_class"))
 
-        self.assertEqual(requests_oauthlib.OAuth1.client_class, oauthlib.oauth1.Client)
+        self.assertEqual(async_oauthlib.OAuth1.client_class, oauthlib.oauth1.Client)
 
-        normal = requests_oauthlib.OAuth1("client_key")
+        normal = async_oauthlib.OAuth1("client_key")
 
         self.assertIsInstance(normal.client, oauthlib.oauth1.Client)
         self.assertNotIsInstance(normal.client, ClientSubclass)
 
-        requests_oauthlib.OAuth1.client_class = ClientSubclass
+        async_oauthlib.OAuth1.client_class = ClientSubclass
 
-        self.assertEqual(requests_oauthlib.OAuth1.client_class, ClientSubclass)
+        self.assertEqual(async_oauthlib.OAuth1.client_class, ClientSubclass)
 
-        custom = requests_oauthlib.OAuth1("client_key")
+        custom = async_oauthlib.OAuth1("client_key")
 
         self.assertIsInstance(custom.client, oauthlib.oauth1.Client)
         self.assertIsInstance(custom.client, ClientSubclass)
 
-        overridden = requests_oauthlib.OAuth1(
+        overridden = async_oauthlib.OAuth1(
             "client_key", client_class=oauthlib.oauth1.Client
         )
 

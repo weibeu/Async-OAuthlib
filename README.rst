@@ -1,19 +1,19 @@
-Requests-OAuthlib |build-status| |coverage-status| |docs|
-=========================================================
+Async-OAuthlib
+==============
 
-This project provides first-class OAuth library support for `Requests <http://python-requests.org>`_.
+This project provides first-class OAuth library support for `Aiohttp <https://github.com/aio-libs/aiohttp>`_.
 
 The OAuth 1 workflow
 --------------------
 
 OAuth 1 can seem overly complicated and it sure has its quirks. Luckily,
-requests_oauthlib hides most of these and let you focus at the task at hand.
+async_oauthlib hides most of these and let you focus at the task at hand.
 
-Accessing protected resources using requests_oauthlib is as simple as:
+Accessing protected resources using async_oauthlib is as simple as:
 
 .. code-block:: pycon
 
-    >>> from requests_oauthlib import OAuth1Session
+    >>> from async_oauthlib import OAuth1Session
     >>> twitter = OAuth1Session('client_key',
                                 client_secret='client_secret',
                                 resource_owner_key='resource_owner_key',
@@ -39,20 +39,18 @@ credentials from your provider (e.g. Google) and authorization from the user
 for whom you wish to retrieve resources for. You can read all about this in the
 full `OAuth 2 workflow guide on RTD <https://requests-oauthlib.readthedocs.io/en/latest/oauth2_workflow.html>`_.
 
+.. code-block:: pycon
+
+    >>> from async_oauthlib import OAuth2Session
+    >>> target = OAuth2Session()
+    >>> response = await target.request()
+
 Installation
 -------------
 
-To install requests and requests_oauthlib you can use pip:
+To install requests and async-oauthlib you can use pip:
 
 .. code-block:: bash
 
-    $ pip install requests requests_oauthlib
+    $ pip install requests Async-OAuthlib
 
-.. |build-status| image:: https://travis-ci.org/requests/requests-oauthlib.svg?branch=master
-   :target: https://travis-ci.org/requests/requests-oauthlib
-.. |coverage-status| image:: https://img.shields.io/coveralls/requests/requests-oauthlib.svg
-   :target: https://coveralls.io/r/requests/requests-oauthlib
-.. |docs| image:: https://readthedocs.org/projects/requests-oauthlib/badge/
-   :alt: Documentation Status
-   :scale: 100%
-   :target: https://requests-oauthlib.readthedocs.io/

@@ -6,7 +6,7 @@ from io import StringIO
 
 from oauthlib.oauth1 import SIGNATURE_TYPE_QUERY, SIGNATURE_TYPE_BODY
 from oauthlib.oauth1 import SIGNATURE_RSA, SIGNATURE_PLAINTEXT
-from requests_oauthlib import OAuth1Session
+from async_oauthlib import OAuth1Session
 
 try:
     import mock

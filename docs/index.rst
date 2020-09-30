@@ -1,13 +1,8 @@
-.. Requests-OAuthlib documentation master file, created by
-   sphinx-quickstart on Fri May 10 11:49:01 2013.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
-
-Requests-OAuthlib: OAuth for Humans
+Async -OAuthlib: OAuth for Humans
 ===================================
 
 Requests-OAuthlib uses the Python
-`Requests <https://github.com/kennethreitz/requests/>`_ and
+`Aiohttp <https://github.com/aio-libs/aiohttp/>`_ and
 `OAuthlib <https://github.com/idan/oauthlib/>`_ libraries to provide an
 easy-to-use Python interface for building OAuth1 and OAuth2 clients.
 
@@ -20,10 +15,10 @@ approximately like this:
 
 .. code-block:: python
 
-    from requests_oauthlib import OAuth2Session
+    from async_oauthlib import OAuth2Session
 
-    from flask import Flask, request, redirect, session, url_for
-    from flask.json import jsonify
+    from quart import Quart, request, redirect, session, url_for
+    from quart.json import jsonify
 
     # This information is obtained upon registration of a new GitHub
     client_id = "<your client key>"
@@ -32,7 +27,7 @@ approximately like this:
     token_url = 'https://github.com/login/oauth/access_token'
 
     @app.route("/login")
-    def login():
+    async def login():
         github = OAuth2Session(client_id)
         authorization_url, state = github.authorization_url(authorization_base_url)
 
@@ -41,12 +36,11 @@ approximately like this:
         return redirect(authorization_url)
 
     @app.route("/callback")
-    def callback():
+    async def callback():
         github = OAuth2Session(client_id, state=session['oauth_state'])
-        token = github.fetch_token(token_url, client_secret=client_secret,
-                                   authorization_response=request.url)
+        token = await github.fetch_token(token_url, client_secret=client_secret, authorization_response=request.url)
 
-        return jsonify(github.get('https://api.github.com/user').json())
+        return jsonify((await github.get('https://api.github.com/user')).json())
 
 
 The above is a truncated example. A full working example is available here:
@@ -58,7 +52,7 @@ Installation
 
 Requests-OAuthlib can be installed with `pip <https://pip.pypa.io/>`_: ::
 
-    $ pip install requests_oauthlib
+    $ pip install Async-OAuthlib
 
 
 Getting Started:

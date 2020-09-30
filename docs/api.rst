@@ -3,7 +3,7 @@
 Developer Interface
 ===================
 
-.. module:: requests_oauthlib
+.. module:: async_oauthlib
 
 
 OAuth 1.0

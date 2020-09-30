@@ -11,14 +11,14 @@ except ImportError:
     from urllib.parse import urlparse, parse_qs
 
 from oauthlib.oauth2.rfc6749.errors import InvalidGrantError
-from requests_oauthlib import OAuth2Session
-from requests_oauthlib.compliance_fixes import facebook_compliance_fix
-from requests_oauthlib.compliance_fixes import fitbit_compliance_fix
-from requests_oauthlib.compliance_fixes import mailchimp_compliance_fix
-from requests_oauthlib.compliance_fixes import weibo_compliance_fix
-from requests_oauthlib.compliance_fixes import slack_compliance_fix
-from requests_oauthlib.compliance_fixes import instagram_compliance_fix
-from requests_oauthlib.compliance_fixes import plentymarkets_compliance_fix
+from async_oauthlib import OAuth2Session
+from async_oauthlib.compliance_fixes import facebook_compliance_fix
+from async_oauthlib.compliance_fixes import fitbit_compliance_fix
+from async_oauthlib.compliance_fixes import mailchimp_compliance_fix
+from async_oauthlib.compliance_fixes import weibo_compliance_fix
+from async_oauthlib.compliance_fixes import slack_compliance_fix
+from async_oauthlib.compliance_fixes import instagram_compliance_fix
+from async_oauthlib.compliance_fixes import plentymarkets_compliance_fix
 
 
 class FacebookComplianceFixTest(TestCase):

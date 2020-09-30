@@ -18,7 +18,7 @@ from oauthlib.oauth2 import TokenExpiredError, OAuth2Error
 from oauthlib.oauth2 import MismatchingStateError
 from oauthlib.oauth2 import WebApplicationClient, MobileApplicationClient
 from oauthlib.oauth2 import LegacyApplicationClient, BackendApplicationClient
-from requests_oauthlib import OAuth2Session, TokenUpdated
+from async_oauthlib import OAuth2Session, TokenUpdated
 import requests
 
 from requests.auth import _basic_auth_str

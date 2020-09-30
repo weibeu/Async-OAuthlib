@@ -3,7 +3,7 @@ from __future__ import unicode_literals
 import logging
 import aiohttp
 
-from requests_oauthlib.utils import BasicAuth
+from async_oauthlib.utils import BasicAuth
 from oauthlib.common import generate_token, urldecode
 from oauthlib.oauth2 import WebApplicationClient, InsecureTransportError
 from oauthlib.oauth2 import LegacyApplicationClient
@@ -424,7 +424,7 @@ class OAuth2Session(aiohttp.ClientSession):
         if headers is None:
             headers = {
                 "Accept": "application/json",
-                "Content-Type": ("application/x-www-form-urlencoded;charset=UTF-8"),
+                "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8",
             }
 
         async with self.post(
@@ -449,7 +449,7 @@ class OAuth2Session(aiohttp.ClientSession):
                 r = hook(r, text)
 
             self.token = self._client.parse_request_body_response(text, scope=self.scope)
-            if not "refresh_token" in self.token:
+            if "refresh_token" not in self.token:
                 log.debug("No new refresh token given. Re-using old.")
                 self.token["refresh_token"] = refresh_token
             return self.token

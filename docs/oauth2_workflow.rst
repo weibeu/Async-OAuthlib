@@ -80,7 +80,7 @@ the provider is Google and the protected resource is the user's profile.
 
 .. code-block:: pycon
 
-    >>> token = oauth.fetch_token(
+    >>> token = await oauth.fetch_token(
             'https://accounts.google.com/o/oauth2/token',
             authorization_response=authorization_response,
             # Google specific extra parameter used for client
@@ -92,7 +92,7 @@ the provider is Google and the protected resource is the user's profile.
 
 .. code-block:: pycon
 
-    >>> r = oauth.get('https://www.googleapis.com/oauth2/v1/userinfo')
+    >>> r = await oauth.get('https://www.googleapis.com/oauth2/v1/userinfo')
     >>> # Enjoy =)
 
 
@@ -124,7 +124,7 @@ The steps below outline how to use the Implicit Code Grant Type flow to obtain a
 
 .. code-block:: pycon
 
-    >>> response = oauth.get(authorization_url)
+    >>> response = await oauth.get(authorization_url)
     >>> oauth.token_from_fragment(response.url)
 
 
@@ -151,7 +151,7 @@ The steps below outline how to use the Resource Owner Password Credentials Grant
     >>> from oauthlib.oauth2 import LegacyApplicationClient
     >>> from requests_oauthlib import OAuth2Session
     >>> oauth = OAuth2Session(client=LegacyApplicationClient(client_id=client_id))
-    >>> token = oauth.fetch_token(token_url='https://somesite.com/oauth2/token',
+    >>> token = await oauth.fetch_token(token_url='https://somesite.com/oauth2/token',
             username=username, password=password, client_id=client_id,
             client_secret=client_secret)
 
@@ -178,7 +178,7 @@ The steps below outline how to use the Resource Owner Client Credentials Grant T
         >>> from requests_oauthlib import OAuth2Session
         >>> client = BackendApplicationClient(client_id=client_id)
         >>> oauth = OAuth2Session(client=client)
-        >>> token = oauth.fetch_token(token_url='https://provider.com/oauth2/token', client_id=client_id,
+        >>> token = await oauth.fetch_token(token_url='https://provider.com/oauth2/token', client_id=client_id,
                 client_secret=client_secret)
 
    If your provider requires that you pass auth credentials in a Basic Auth header, you can do this instead:
@@ -191,7 +191,7 @@ The steps below outline how to use the Resource Owner Client Credentials Grant T
         >>> auth = HTTPBasicAuth(client_id, client_secret)
         >>> client = BackendApplicationClient(client_id=client_id)
         >>> oauth = OAuth2Session(client=client)
-        >>> token = oauth.fetch_token(token_url='https://provider.com/oauth2/token', auth=auth)
+        >>> token = await oauth.fetch_token(token_url='https://provider.com/oauth2/token', auth=auth)
 
 Refreshing tokens
 -----------------
@@ -235,7 +235,7 @@ for ``expires_in`` or omit it entirely.
     ... }
 
     >>> # After updating the token you will most likely want to save it.
-    >>> def token_saver(token):
+    >>> async def token_saver(token):
     ...     # save token in database / session
 
 (First) Define Try-Catch TokenExpiredError on each request
@@ -250,12 +250,12 @@ is necessary but refreshing is done manually.
     >>> from oauthlib.oauth2 import TokenExpiredError
     >>> try:
     ...     client = OAuth2Session(client_id, token=token)
-    ...     r = client.get(protected_url)
+    ...     r = await client.get(protected_url)
     >>> except TokenExpiredError as e:
-    ...     token = client.refresh_token(refresh_url, **extra)
-    ...     token_saver(token)
+    ...     token = await client.refresh_token(refresh_url, **extra)
+    ...     await token_saver(token)
     >>> client = OAuth2Session(client_id, token=token)
-    >>> r = client.get(protected_url)
+    >>> r = await client.get(protected_url)
 
 (Second) Define automatic token refresh automatic but update manually
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -270,9 +270,9 @@ is done manually.
     >>> try:
     ...     client = OAuth2Session(client_id, token=token,
     ...             auto_refresh_kwargs=extra, auto_refresh_url=refresh_url)
-    ...     r = client.get(protected_url)
+    ...     r = await client.get(protected_url)
     >>> except TokenUpdated as e:
-    ...     token_saver(e.token)
+    ...     await token_saver(e.token)
 
 (Third, Recommended) Define automatic token refresh and update
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -286,7 +286,7 @@ however that you still need to update ``expires_in`` to trigger the refresh.
     >>> from requests_oauthlib import OAuth2Session
     >>> client = OAuth2Session(client_id, token=token, auto_refresh_url=refresh_url,
     ...     auto_refresh_kwargs=extra, token_updater=token_saver)
-    >>> r = client.get(protected_url)
+    >>> r = await client.get(protected_url)
 
 TLS Client Authentication
 -------------------------
@@ -297,7 +297,7 @@ token request and ensure that the client id is sent in the request:
 
 .. code-block:: pycon
 
-   >>> oauth.fetch_token(token_url='https://somesite.com/oauth2/token',
+   >>> await oauth.fetch_token(token_url='https://somesite.com/oauth2/token',
    ...     include_client_id=True, cert=('test-client.pem', 'test-client-key.pem'))
 
 .. _write this section: https://github.com/requests/requests-oauthlib/issues/48

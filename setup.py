@@ -10,7 +10,7 @@ from setuptools import setup
 
 # Get the version
 version_regex = r'__version__ = ["\']([^"\']*)["\']'
-with open("requests_oauthlib/__init__.py", "r") as f:
+with open("async_oauthlib/__init__.py", "r") as f:
     text = f.read()
     match = re.search(version_regex, text)
 
@@ -20,7 +20,7 @@ with open("requests_oauthlib/__init__.py", "r") as f:
         raise RuntimeError("No version number found!")
 
 
-APP_NAME = "requests-oauthlib"
+APP_NAME = "Async-OAuthlib"
 
 # Publish Helper.
 if sys.argv[-1] == "publish":
@@ -36,14 +36,14 @@ def readall(path):
 setup(
     name=APP_NAME,
     version=VERSION,
-    description="OAuthlib authentication support for Requests.",
+    description="OAuthlib authentication support for Aiohttp.",
     long_description=readall("README.rst") + "\n\n" + readall("HISTORY.rst"),
-    author="Kenneth Reitz",
-    author_email="me@kennethreitz.com",
-    url="https://github.com/requests/requests-oauthlib",
-    packages=["requests_oauthlib", "requests_oauthlib.compliance_fixes"],
+    author="□ | The Cosmos",
+    author_email="deepakrajko14@gmail.com",
+    url="https://github.com/thec0sm0s/Async-OAuthlib",
+    packages=["async_oauthlib", "async_oauthlib.compliance_fixes"],
     python_requires=">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*",
-    install_requires=["oauthlib>=3.0.0", "requests>=2.0.0"],
+    install_requires=["oauthlib>=3.0.0", "aiohttp"],
     extras_require={"rsa": ["oauthlib[signedtoken]>=3.0.0"]},
     license="ISC",
     classifiers=[
