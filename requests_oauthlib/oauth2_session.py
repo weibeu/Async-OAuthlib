@@ -186,7 +186,7 @@ class OAuth2Session(aiohttp.ClientSession):
         force_querystring=False,
         timeout=None,
         headers=None,
-        verify=True,
+        verify_ssl=True,
         proxies=None,
         include_client_id=None,
         client_secret=None,
@@ -219,7 +219,7 @@ class OAuth2Session(aiohttp.ClientSession):
             in the querystring instead.
         :param timeout: Timeout of the request in seconds.
         :param headers: Dict to default request headers with.
-        :param verify: Verify SSL certificate.
+        :param verify_ssl: Verify SSL certificate.
         :param proxies: The `proxies` argument is passed onto `requests`.
         :param include_client_id: Should the request body include the
                                   `client_id` parameter. Default is `None`,
@@ -345,7 +345,7 @@ class OAuth2Session(aiohttp.ClientSession):
             timeout=timeout,
             headers=headers,
             auth=auth,
-            verify=verify,
+            verify_ssl=verify_ssl,
             proxies=proxies,
             cert=cert,
             **request_kwargs
@@ -389,7 +389,7 @@ class OAuth2Session(aiohttp.ClientSession):
         auth=None,
         timeout=None,
         headers=None,
-        verify=True,
+        verify_ssl=True,
         proxies=None,
         **kwargs
     ):
@@ -402,7 +402,7 @@ class OAuth2Session(aiohttp.ClientSession):
         :param auth: An auth tuple or method as accepted by `requests`.
         :param timeout: Timeout of the request in seconds.
         :param headers: A dict of headers to be used by `requests`.
-        :param verify: Verify SSL certificate.
+        :param verify_ssl: Verify SSL certificate.
         :param proxies: The `proxies` argument will be passed to `requests`.
         :param kwargs: Extra parameters to include in the token request.
         :return: A token dict
@@ -436,7 +436,7 @@ class OAuth2Session(aiohttp.ClientSession):
             auth=auth,
             timeout=timeout,
             headers=headers,
-            verify=verify,
+            verify=verify_ssl,
             withhold_token=True,
             proxies=proxies,
         ) as r:
