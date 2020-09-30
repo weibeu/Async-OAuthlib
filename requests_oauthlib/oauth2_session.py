@@ -339,7 +339,7 @@ class OAuth2Session(aiohttp.ClientSession):
         else:
             raise ValueError("The method kwarg must be POST or GET.")
 
-        async with self.request(
+        async with await self.request(
             method=method,
             url=token_url,
             timeout=timeout,
