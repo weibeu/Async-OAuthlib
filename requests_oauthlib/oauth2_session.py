@@ -351,7 +351,7 @@ class OAuth2Session(aiohttp.ClientSession):
             log.debug("Request to fetch token completed with status %s.", r.status)
             log.debug("Request url was %s", r.request_info.url)
             log.debug("Request headers were %s", r.request_info.headers)
-            log.debug("Request body was %s", r.request_info.body)
+            log.debug("Request body was %s", text)
             log.debug("Response headers were %s and content %s.", r.headers, text)
             log.debug(
                 "Invoking %d token response hooks.",
