@@ -3,5 +3,5 @@ import aiohttp
 
 class BasicAuth(aiohttp.BasicAuth):
 
-    def __init__(self, login, password, **kwargs):
-        super(BasicAuth, self).__init__(str(login), str(password), **kwargs)
+    def __new__(cls, login, password, **kwargs):
+        return super(BasicAuth, cls).__new__(cls, str(login), str(password), **kwargs)
