@@ -23,7 +23,7 @@ class OAuth2(aiohttp.BasicAuth):
             for k, v in token.items():
                 setattr(self._client, k, v)
 
-    def __call__(self, r):
+    async def __call__(self, r):
         """Append an OAuth 2 token to the request.
 
         Note that currently HTTPS is required for all requests. There may be
