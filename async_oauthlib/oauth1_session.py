@@ -6,11 +6,11 @@ except ImportError:
     from urllib.parse import urlparse
 
 import logging
-
+import aiohttp
 from oauthlib.common import add_params_to_uri
 from oauthlib.common import urldecode as _urldecode
 from oauthlib.oauth1 import SIGNATURE_HMAC, SIGNATURE_RSA, SIGNATURE_TYPE_AUTH_HEADER
-import requests
+
 
 from . import OAuth1
 
@@ -49,7 +49,7 @@ class VerifierMissing(ValueError):
     pass
 
 
-class OAuth1Session(requests.Session):
+class OAuth1Session(aiohttp.ClientSession):
     """Request signing and convenience methods for the oauth dance.
 
     What is the difference between OAuth1Session and OAuth1?
@@ -257,7 +257,7 @@ class OAuth1Session(requests.Session):
         log.debug("Adding parameters %s to url %s", kwargs, url)
         return add_params_to_uri(url, kwargs.items())
 
-    def fetch_request_token(self, url, realm=None, **request_kwargs):
+    async def fetch_request_token(self, url, realm=None, **request_kwargs):
         r"""Fetch a request token.
 
         This is the first step in the OAuth 1 workflow. A request token is
@@ -284,13 +284,13 @@ class OAuth1Session(requests.Session):
         }
         """
         self._client.client.realm = " ".join(realm) if realm else None
-        token = self._fetch_token(url, **request_kwargs)
+        token = await self._fetch_token(url, **request_kwargs)
         log.debug("Resetting callback_uri and realm (not needed in next phase).")
         self._client.client.callback_uri = None
         self._client.client.realm = None
         return token
 
-    def fetch_access_token(self, url, verifier=None, **request_kwargs):
+    async def fetch_access_token(self, url, verifier=None, **request_kwargs):
         """Fetch an access token.
 
         This is the final step in the OAuth 1 workflow. An access token is
@@ -320,7 +320,7 @@ class OAuth1Session(requests.Session):
             self._client.client.verifier = verifier
         if not getattr(self._client.client, "verifier", None):
             raise VerifierMissing("No client verifier has been set.")
-        token = self._fetch_token(url, **request_kwargs)
+        token = await self._fetch_token(url, **request_kwargs)
         log.debug("Resetting verifier attribute, should not be used anymore.")
         self._client.client.verifier = None
         return token
@@ -360,32 +360,32 @@ class OAuth1Session(requests.Session):
         if "oauth_verifier" in token:
             self._client.client.verifier = token["oauth_verifier"]
 
-    def _fetch_token(self, url, **request_kwargs):
+    async def _fetch_token(self, url, **request_kwargs):
         log.debug("Fetching token from %s using client %s", url, self._client.client)
-        r = self.post(url, **request_kwargs)
+        async with self.post(url, **request_kwargs) as r:
+            text = await r.text()
+            if r.status_code >= 400:
+                error = "Token request failed with code %s, response was '%s'."
+                raise TokenRequestDenied(error % (r.status_code, r.text), r)
 
-        if r.status_code >= 400:
-            error = "Token request failed with code %s, response was '%s'."
-            raise TokenRequestDenied(error % (r.status_code, r.text), r)
+            log.debug('Decoding token from response "%s"', r.text)
+            try:
+                token = dict(urldecode(r.text.strip()))
+            except ValueError as e:
+                error = (
+                    "Unable to decode token from token response. "
+                    "This is commonly caused by an unsuccessful request where"
+                    " a non urlencoded error message is returned. "
+                    "The decoding error was %s"
+                    "" % e
+                )
+                raise ValueError(error)
 
-        log.debug('Decoding token from response "%s"', r.text)
-        try:
-            token = dict(urldecode(r.text.strip()))
-        except ValueError as e:
-            error = (
-                "Unable to decode token from token response. "
-                "This is commonly caused by an unsuccessful request where"
-                " a non urlencoded error message is returned. "
-                "The decoding error was %s"
-                "" % e
-            )
-            raise ValueError(error)
-
-        log.debug("Obtained token %s", token)
-        log.debug("Updating internal client attributes from token data.")
-        self._populate_attributes(token)
-        self.token = token
-        return token
+            log.debug("Obtained token %s", token)
+            log.debug("Updating internal client attributes from token data.")
+            self._populate_attributes(token)
+            self.token = token
+            return token
 
     def rebuild_auth(self, prepared_request, response):
         """
