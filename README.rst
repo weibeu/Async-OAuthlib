@@ -3,6 +3,16 @@ Async-OAuthlib
 
 This project provides first-class OAuth library support for `Aiohttp <https://github.com/aio-libs/aiohttp>`_.
 
+Installation
+-------------
+
+To install requests and async-oauthlib you can use pip:
+
+.. code-block:: bash
+
+    $ pip install requests Async-OAuthlib
+
+
 The OAuth 1 workflow
 --------------------
 
@@ -44,13 +54,3 @@ full `OAuth 2 workflow guide on RTD <https://requests-oauthlib.readthedocs.io/en
     >>> from async_oauthlib import OAuth2Session
     >>> target = OAuth2Session()
     >>> response = await target.request()
-
-Installation
--------------
-
-To install requests and async-oauthlib you can use pip:
-
-.. code-block:: bash
-
-    $ pip install requests Async-OAuthlib
-
