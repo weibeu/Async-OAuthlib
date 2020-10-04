@@ -7,7 +7,7 @@ toy.py
 violations.pyflakes.txt
 cover/
 docs/_build
-requests_oauthlib.egg-info/
+async_oauthlib.egg-info/
 *.pyc
 *.swp
 *~

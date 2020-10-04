@@ -14,4 +14,4 @@ __all__ = [
 
 __version__ = "0.0.3"
 
-logging.getLogger("requests_oauthlib").addHandler(logging.NullHandler())
+logging.getLogger("async_oauthlib").addHandler(logging.NullHandler())

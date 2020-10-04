@@ -6,22 +6,22 @@ import logging
 from oauthlib.common import extract_params
 from oauthlib.oauth1 import Client, SIGNATURE_HMAC, SIGNATURE_TYPE_AUTH_HEADER
 from oauthlib.oauth1 import SIGNATURE_TYPE_BODY
-from requests.compat import is_py3
 from requests.utils import to_native_string
-from requests.auth import AuthBase
+from aiohttp import BasicAuth
 
 CONTENT_TYPE_FORM_URLENCODED = "application/x-www-form-urlencoded"
 CONTENT_TYPE_MULTI_PART = "multipart/form-data"
 
-if is_py3:
-    unicode = str
+unicode = str
 
 log = logging.getLogger(__name__)
 
 # OBS!: Correct signing of requests are conditional on invoking OAuth1
 # as the last step of preparing a request, or at least having the
 # content-type set properly.
-class OAuth1(AuthBase):
+
+
+class OAuth1(BasicAuth):
     """Signs the request using OAuth 1 (RFC5849)"""
 
     client_class = Client
@@ -75,11 +75,11 @@ class OAuth1(AuthBase):
         # Overwriting url is safe here as request will not modify it past
         # this point.
         log.debug("Signing request %s using client %s", r, self.client)
-
+        r.raw_body = await r.body()
         content_type = r.headers.get("Content-Type", "")
         if (
             not content_type
-            and extract_params(r.body)
+            and extract_params(r.raw_body)
             or self.client.signature_type == SIGNATURE_TYPE_BODY
         ):
             content_type = CONTENT_TYPE_FORM_URLENCODED
@@ -95,16 +95,17 @@ class OAuth1(AuthBase):
 
         if is_form_encoded:
             r.headers["Content-Type"] = CONTENT_TYPE_FORM_URLENCODED
-            r.url, headers, r.body = self.client.sign(
-                unicode(r.url), unicode(r.method), r.body or "", r.headers
+            r.url, headers, r.raw_body = self.client.sign(
+                unicode(r.url), unicode(r.method), r.raw_body or "", r.headers
             )
         elif self.force_include_body:
             # To allow custom clients to work on non form encoded bodies.
-            r.url, headers, r.body = self.client.sign(
-                unicode(r.url), unicode(r.method), r.body or "", r.headers
+            r.url, headers, r.raw_body = self.client.sign(
+                unicode(r.url), unicode(r.method), r.raw_body or "", r.headers
             )
         else:
             # Omit body data in the signing of non form-encoded requests
+            # noinspection PyArgumentEqualDefault
             r.url, headers, _ = self.client.sign(
                 unicode(r.url), unicode(r.method), None, r.headers
             )
@@ -113,5 +114,5 @@ class OAuth1(AuthBase):
         r.url = to_native_string(r.url)
         log.debug("Updated url: %s", r.url)
         log.debug("Updated headers: %s", headers)
-        log.debug("Updated body: %r", r.body)
+        log.debug("Updated body: %r", r.raw_body)
         return r

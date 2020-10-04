@@ -7,12 +7,13 @@ except ImportError:
 
 import logging
 import aiohttp
+
 from oauthlib.common import add_params_to_uri
 from oauthlib.common import urldecode as _urldecode
 from oauthlib.oauth1 import SIGNATURE_HMAC, SIGNATURE_RSA, SIGNATURE_TYPE_AUTH_HEADER
 
 
-from . import OAuth1
+from .oauth1_auth import OAuth1
 
 
 log = logging.getLogger(__name__)
@@ -20,6 +21,7 @@ log = logging.getLogger(__name__)
 
 def urldecode(body):
     """Parse query or json to python dictionary"""
+    # noinspection PyBroadException
     try:
         return _urldecode(body)
     except Exception:
@@ -34,9 +36,9 @@ class TokenRequestDenied(ValueError):
         self.response = response
 
     @property
-    def status_code(self):
+    def status(self):
         """For backwards-compatibility purposes"""
-        return self.response.status_code
+        return self.response.status
 
 
 class TokenMissing(ValueError):
@@ -74,7 +76,7 @@ class OAuth1Session(aiohttp.ClientSession):
     >>> oauth_session = OAuth1Session(client_key,client_secret=client_secret, callback_uri=callback_uri)
     >>>
     >>> # First step, fetch the request token.
-    >>> oauth_session.fetch_request_token(request_token_url)
+    >>> await oauth_session.fetch_request_token(request_token_url)
     {
         'oauth_token': 'kjerht2309u',
         'oauth_token_secret': 'lsdajfh923874',
@@ -85,14 +87,14 @@ class OAuth1Session(aiohttp.ClientSession):
     'https://api.twitter.com/oauth/authorize?oauth_token=sdf0o9823sjdfsdf&oauth_callback=https%3A%2F%2F127.0.0.1%2Fcallback'
     >>>
     >>> # Third step. Fetch the access token
-    >>> redirect_response = raw_input('Paste the full redirect URL here.')
+    >>> redirect_response = input('Paste the full redirect URL here.')
     >>> oauth_session.parse_authorization_response(redirect_response)
     {
         'oauth_token: 'kjerht2309u',
         'oauth_token_secret: 'lsdajfh923874',
         'oauth_verifier: 'w34o8967345',
     }
-    >>> oauth_session.fetch_access_token(access_token_url)
+    >>> await oauth_session.fetch_access_token(access_token_url)
     {
         'oauth_token': 'sdf0o9823sjdfsdf',
         'oauth_token_secret': '2kjshdfp92i34asdasd',
@@ -100,7 +102,7 @@ class OAuth1Session(aiohttp.ClientSession):
     >>> # Done. You can now make OAuth requests.
     >>> status_url = 'http://api.twitter.com/1/statuses/update.json'
     >>> new_status = {'status':  'hello world!'}
-    >>> oauth_session.post(status_url, data=new_status)
+    >>> await oauth_session.post(status_url, data=new_status)
     <Response [200]>
     """
 
@@ -230,7 +232,7 @@ class OAuth1Session(aiohttp.ClientSession):
         >>> request_token_url = 'https://api.twitter.com/oauth/request_token'
         >>> authorization_url = 'https://api.twitter.com/oauth/authorize'
         >>> oauth_session = OAuth1Session('client-key', client_secret='secret')
-        >>> oauth_session.fetch_request_token(request_token_url)
+        >>> await oauth_session.fetch_request_token(request_token_url)
         {
             'oauth_token': 'sdf0o9823sjdfsdf',
             'oauth_token_secret': '2kjshdfp92i34asdasd',
@@ -245,7 +247,7 @@ class OAuth1Session(aiohttp.ClientSession):
         >>> request_token_url = 'https://api.twitter.com/oauth/request_token'
         >>> authorization_url = 'https://api.twitter.com/oauth/authorize'
         >>> oauth_session = OAuth1Session('client-key', client_secret='secret', callback_uri='https://127.0.0.1/callback')
-        >>> oauth_session.fetch_request_token(request_token_url)
+        >>> await oauth_session.fetch_request_token(request_token_url)
         {
             'oauth_token': 'sdf0o9823sjdfsdf',
             'oauth_token_secret': '2kjshdfp92i34asdasd',
@@ -257,7 +259,7 @@ class OAuth1Session(aiohttp.ClientSession):
         log.debug("Adding parameters %s to url %s", kwargs, url)
         return add_params_to_uri(url, kwargs.items())
 
-    async def fetch_request_token(self, url, realm=None, **request_kwargs):
+    async def fetch_request_token(self, url, realm=None, **kwargs):
         r"""Fetch a request token.
 
         This is the first step in the OAuth 1 workflow. A request token is
@@ -267,8 +269,8 @@ class OAuth1Session(aiohttp.ClientSession):
 
         :param url: The request token endpoint URL.
         :param realm: A list of realms to request access to.
-        :param \*\*request_kwargs: Optional arguments passed to ''post''
-        function in ''requests.Session''
+        :param kwargs: Optional arguments passed to ''post''
+        function in ''aiohttp.ClientSession''
         :returns: The response in dict format.
 
         Note that a previously set callback_uri will be reset for your
@@ -277,20 +279,20 @@ class OAuth1Session(aiohttp.ClientSession):
 
         >>> request_token_url = 'https://api.twitter.com/oauth/request_token'
         >>> oauth_session = OAuth1Session('client-key', client_secret='secret')
-        >>> oauth_session.fetch_request_token(request_token_url)
+        >>> await oauth_session.fetch_request_token(request_token_url)
         {
             'oauth_token': 'sdf0o9823sjdfsdf',
             'oauth_token_secret': '2kjshdfp92i34asdasd',
         }
         """
         self._client.client.realm = " ".join(realm) if realm else None
-        token = await self._fetch_token(url, **request_kwargs)
+        token = await self._fetch_token(url, **kwargs)
         log.debug("Resetting callback_uri and realm (not needed in next phase).")
         self._client.client.callback_uri = None
         self._client.client.realm = None
         return token
 
-    async def fetch_access_token(self, url, verifier=None, **request_kwargs):
+    async def fetch_access_token(self, url, verifier=None, **kwargs):
         """Fetch an access token.
 
         This is the final step in the OAuth 1 workflow. An access token is
@@ -310,7 +312,7 @@ class OAuth1Session(aiohttp.ClientSession):
             'oauth_token_secret: 'lsdajfh923874',
             'oauth_verifier: 'w34o8967345',
         }
-        >>> oauth_session.fetch_access_token(access_token_url)
+        >>> await oauth_session.fetch_access_token(access_token_url)
         {
             'oauth_token': 'sdf0o9823sjdfsdf',
             'oauth_token_secret': '2kjshdfp92i34asdasd',
@@ -320,7 +322,7 @@ class OAuth1Session(aiohttp.ClientSession):
             self._client.client.verifier = verifier
         if not getattr(self._client.client, "verifier", None):
             raise VerifierMissing("No client verifier has been set.")
-        token = await self._fetch_token(url, **request_kwargs)
+        token = await self._fetch_token(url, **kwargs)
         log.debug("Resetting verifier attribute, should not be used anymore.")
         self._client.client.verifier = None
         return token
@@ -360,17 +362,17 @@ class OAuth1Session(aiohttp.ClientSession):
         if "oauth_verifier" in token:
             self._client.client.verifier = token["oauth_verifier"]
 
-    async def _fetch_token(self, url, **request_kwargs):
+    async def _fetch_token(self, url, **kwargs):
         log.debug("Fetching token from %s using client %s", url, self._client.client)
-        async with self.post(url, **request_kwargs) as r:
+        async with self.post(url, **kwargs) as r:
             text = await r.text()
-            if r.status_code >= 400:
+            if r.status >= 400:
                 error = "Token request failed with code %s, response was '%s'."
-                raise TokenRequestDenied(error % (r.status_code, r.text), r)
+                raise TokenRequestDenied(error % (r.status, text), r)
 
-            log.debug('Decoding token from response "%s"', r.text)
+            log.debug('Decoding token from response "%s"', text)
             try:
-                token = dict(urldecode(r.text.strip()))
+                token = dict(urldecode(text.strip()))
             except ValueError as e:
                 error = (
                     "Unable to decode token from token response. "
