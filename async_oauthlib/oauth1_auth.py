@@ -66,7 +66,7 @@ class OAuth1(BasicAuth):
             **kwargs
         )
 
-    def __call__(self, r):
+    async def __call__(self, r):
         """Add OAuth parameters to the request.
 
         Parameters may be included from the body if the content-type is

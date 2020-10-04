@@ -269,8 +269,7 @@ class OAuth1Session(aiohttp.ClientSession):
 
         :param url: The request token endpoint URL.
         :param realm: A list of realms to request access to.
-        :param kwargs: Optional arguments passed to ''post''
-        function in ''aiohttp.ClientSession''
+        :param kwargs: Optional arguments passed to ''post'' function in ''aiohttp.ClientSession''
         :returns: The response in dict format.
 
         Note that a previously set callback_uri will be reset for your
