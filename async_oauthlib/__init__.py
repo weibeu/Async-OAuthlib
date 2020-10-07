@@ -12,6 +12,6 @@ __all__ = [
     "TokenUpdated",
 ]
 
-__version__ = "0.0.4"
+__version__ = "0.0.5"
 
 logging.getLogger("async_oauthlib").addHandler(logging.NullHandler())
