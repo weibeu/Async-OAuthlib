@@ -43,7 +43,7 @@ setup(
     url="https://github.com/thec0sm0s/Async-OAuthlib",
     packages=["async_oauthlib", "async_oauthlib.compliance_fixes"],
     python_requires=">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*",
-    install_requires=["oauthlib>=3.0.0", "aiohttp"],
+    install_requires=["oauthlib>=3.0.0", "aiohttp", "requests"],
     extras_require={"rsa": ["oauthlib[signedtoken]>=3.0.0"]},
     license="ISC",
     classifiers=[
