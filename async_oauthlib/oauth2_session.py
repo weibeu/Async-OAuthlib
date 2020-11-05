@@ -433,7 +433,7 @@ class OAuth2Session(aiohttp.ClientSession):
             auth=auth,
             timeout=timeout,
             headers=headers,
-            verify=verify_ssl,
+            verify_ssl=verify_ssl,
             withhold_token=True,
             proxy=proxy,
         ) as r:
