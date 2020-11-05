@@ -498,7 +498,7 @@ class OAuth2Session(aiohttp.ClientSession):
                             client_id,
                         )
                         auth = BasicAuth(client_id, client_secret)
-                    token = self.refresh_token(
+                    token = await self.refresh_token(
                         self.auto_refresh_url, auth=auth, **kwargs
                     )
                     if self.token_updater:
