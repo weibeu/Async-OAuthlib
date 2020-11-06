@@ -434,7 +434,6 @@ class OAuth2Session(aiohttp.ClientSession):
             timeout=timeout,
             headers=headers,
             verify_ssl=verify_ssl,
-            withhold_token=True,
             proxy=proxy,
         ) as r:
             text = await r.text()
